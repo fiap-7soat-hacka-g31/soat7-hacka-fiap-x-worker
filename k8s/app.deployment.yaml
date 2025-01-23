@@ -1,0 +1,117 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fiap-x-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fiap-x-api
+  template:
+    metadata:
+      labels:
+        app: fiap-x-api
+    spec:
+      terminationGracePeriodSeconds: 90
+      automountServiceAccountToken: false
+      containers:
+        - name: fiap-x-api-app
+          image: gm50x/fiap-x-api:latest
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: fiap-x-api
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: APP_NAME
+              value: "FiapBurgerPayments"
+            - name: APP_DESCRIPTION
+              value: "Payments Component for Fiap Burger"
+            - name: APP_VERSION
+              value: "1.0.0"
+            - name: PORT
+              value: "3000"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: LOG_FORMAT
+              value: "pretty" # pretty | json
+            - name: TRAFFIC_INSPECTION_HTTP
+              value: "all" # inbound|outbound|all|none
+            - name: TRAFFIC_INSPECTION_AMQP
+              value: "all" # inbound|outbound|all|none
+            - name: ROUTE_PREFIX
+              value: "dev/fiap-x-api"
+          ports:
+            - name: http
+              containerPort: 3000
+          resources:
+            requests:
+              cpu: 20m
+              memory: "128Mi"
+            limits:
+              cpu: 150m
+              memory: "256Mi"
+          livenessProbe:
+            initialDelaySeconds: 10
+            failureThreshold: 3
+            periodSeconds: 15
+            httpGet:
+              path: /dev/fiap-x-api/healthz
+              port: 3000
+          readinessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            httpGet:
+              path: /dev/fiap-x-api/healthz/self
+              port: 3000
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: fiap-x-api-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: fiap-x-api
+  minReplicas: 1
+  maxReplicas: 5
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 30
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+  metrics:
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 150
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fiap-x-api-lb-srv
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+spec:
+  selector:
+    app: fiap-x-api
+  type: LoadBalancer
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3000
+      targetPort: 3000

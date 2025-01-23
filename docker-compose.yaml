@@ -1,0 +1,95 @@
+services:
+  fiap-x-identity:
+    image: gm50x/fiap-x-identity:latest
+    container_name: fiap-x-identity
+    restart: 'on-failure'
+    ports:
+      - 3400:3400
+    environment:
+      NODE_ENV: 'development'
+      APP_NAME: 'FiapXIdentity'
+      APP_DESCRIPTION: 'Identity Component for Fiap X'
+      APP_VERSION: '1.0.0'
+      PORT: '3400'
+      LOG_LEVEL: 'debug'
+      LOG_FORMAT: 'pretty' # pretty | json
+      TRAFFIC_INSPECTION_HTTP: 'all' # inbound|outbound|all|none
+      TRAFFIC_INSPECTION_AMQP: 'all' # inbound|outbound|all|none
+      ROUTE_PREFIX: ''
+      MONGO_URL: 'mongodb://fiapx:fiapx@identity-mongodb:27017/FiapXIdentity?authSource=admin'
+      AMQP_URL: 'amqp://fiapx:fiapx@rabbitmq:5672'
+      JWT_SIGNING_SECRET: 'supersecret'
+      JWT_EXPIRES_IN: '900s'
+    depends_on: [mongodb, rabbitmq]
+  aws_s3:
+    image: localstack/localstack:s3-latest
+    container_name: fiap-x-aws-s3
+    ports:
+      - 4566:4566
+    volumes:
+      - ./localstack/init-s3.py:/etc/localstack/init/ready.d/init-s3.py
+  mongodb:
+    image: fiapx/mongodbrs:6
+    build:
+      context: ./localstack
+      dockerfile: ./Dockerfile.mongodb
+    container_name: fiap-x-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: 'fiapx'
+      MONGO_INITDB_ROOT_PASSWORD: 'fiapx'
+    command: 'mongod --replSet rs0 --keyFile /opt/.keyfile/keyfile --bind_ip_all'
+    ports:
+      - 27017:27017
+  mongodb_init:
+    image: mongo:6
+    container_name: fiap-x-mongodb-init
+    restart: 'on-failure'
+    depends_on: [mongodb]
+    command: >-
+      sh -c "sleep 10 && mongosh -u fiapx -p fiapx --host mongodb:27017 --eval 'rs.initiate({
+        \"_id\":\"rs0\",
+        "members":[
+          {
+            \"_id\": 0,
+            \"host\":\"localhost:27017\",
+          }
+        ]
+      })' && if [ $(mongosh -u fiapx -p fiapx --quiet --host mongodb:27017 --eval 'rs.status().ok') -eq 1 ]; then exit 0; else exit 1; fi"
+  identity-mongodb:
+    image: fiapx/mongodbrs:6
+    build:
+      context: ./localstack
+      dockerfile: ./Dockerfile.mongodb
+    container_name: fiap-x-identity-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: 'fiapx'
+      MONGO_INITDB_ROOT_PASSWORD: 'fiapx'
+    command: 'mongod --replSet rs0 --keyFile /opt/.keyfile/keyfile --bind_ip_all'
+  identity_mongodb_init:
+    image: mongo:6
+    container_name: fiap-x-identity-mongodb-init
+    restart: 'on-failure'
+    depends_on: [mongodb]
+    command: >-
+      sh -c "sleep 10 && mongosh -u fiapx -p fiapx --host identity-mongodb:27017 --eval 'rs.initiate({
+        \"_id\":\"rs0\",
+        "members":[
+          {
+            \"_id\": 0,
+            \"host\":\"identity-mongodb:27017\",
+          }
+        ]
+      })' && if [ $(mongosh -u fiapx -p fiapx --quiet --host identity-mongodb:27017 --eval 'rs.status().ok') -eq 1 ]; then exit 0; else exit 1; fi"
+  rabbitmq:
+    image: fiapx/rabbitmq:3-management-delayed
+    build:
+      context: ./localstack
+      dockerfile: ./Dockerfile.rabbitmq
+    container_name: fiap-x-rabbitmq
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: 'fiapx'
+      RABBITMQ_DEFAULT_PASS: 'fiapx'
+    ports:
+      - 5672:5672
+      - 15672:15672

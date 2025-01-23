@@ -1,0 +1,7 @@
+{
+  "jest.jestCommandLine": "npm run test:all -- ",
+  "typescript.preferences.autoImportFileExcludePatterns": [
+    "**/node_modules/winston",
+    "**/node_modules/nest-winston"
+  ]
+}
