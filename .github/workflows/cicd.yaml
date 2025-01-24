@@ -1,4 +1,4 @@
-name: FiapXApi - CICD
+name: FiapXWorker - CICD
 
 on:
   push:
