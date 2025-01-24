@@ -63,9 +63,9 @@ export class AwsS3StorageService {
     bucket,
     key,
     downloadToPath,
-  }: FileDownloadInput): Promise<void> {
+  }: FileDownloadInput): Promise<{ contentType: string }> {
     const command = new GetObjectCommand({ Bucket: bucket, Key: key });
-    const { Body: data } = await this.s3Client.send(command);
+    const { ContentType, Body: data } = await this.s3Client.send(command);
 
     const writeStream = createWriteStream(downloadToPath);
     this.assertIsReadable(data);
@@ -74,7 +74,7 @@ export class AwsS3StorageService {
       data
         .pipe(writeStream)
         .on('error', (...args) => reject(...args))
-        .on('finish', (...args) => resolve(...args));
+        .on('finish', () => resolve({ contentType: ContentType }));
     });
   }
 

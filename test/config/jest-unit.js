@@ -10,5 +10,7 @@ module.exports = {
     ...jestConfig.collectCoverageFrom,
     '!**/main.(t|j)s',
     '!**/*.module.(t|j)s',
+    '!**/infra/**/*.(t|j)s',
+    '!**/drivers/**/*.(t|j)s',
   ],
 };

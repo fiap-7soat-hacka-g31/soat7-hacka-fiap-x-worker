@@ -2,33 +2,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: fiap-x-api
+  name: fiap-x-worker
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: fiap-x-api
+      app: fiap-x-worker
   template:
     metadata:
       labels:
-        app: fiap-x-api
+        app: fiap-x-worker
     spec:
       terminationGracePeriodSeconds: 90
       automountServiceAccountToken: false
       containers:
-        - name: fiap-x-api-app
-          image: gm50x/fiap-x-api:latest
+        - name: fiap-x-worker-app
+          image: gm50x/fiap-x-worker:latest
           imagePullPolicy: Always
           envFrom:
             - secretRef:
-                name: fiap-x-api
+                name: fiap-x-worker
           env:
             - name: NODE_ENV
               value: "production"
             - name: APP_NAME
-              value: "FiapBurgerPayments"
+              value: "FiapXWorker"
             - name: APP_DESCRIPTION
-              value: "Payments Component for Fiap Burger"
+              value: "Worker Component for Fiap X"
             - name: APP_VERSION
               value: "1.0.0"
             - name: PORT
@@ -42,7 +42,7 @@ spec:
             - name: TRAFFIC_INSPECTION_AMQP
               value: "all" # inbound|outbound|all|none
             - name: ROUTE_PREFIX
-              value: "dev/fiap-x-api"
+              value: "dev/fiap-x-worker"
           ports:
             - name: http
               containerPort: 3000
@@ -58,24 +58,24 @@ spec:
             failureThreshold: 3
             periodSeconds: 15
             httpGet:
-              path: /dev/fiap-x-api/healthz
+              path: /dev/fiap-x-worker/healthz
               port: 3000
           readinessProbe:
             initialDelaySeconds: 10
             periodSeconds: 10
             httpGet:
-              path: /dev/fiap-x-api/healthz/self
+              path: /dev/fiap-x-worker/healthz/self
               port: 3000
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: fiap-x-api-hpa
+  name: fiap-x-worker-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: fiap-x-api
+    name: fiap-x-worker
   minReplicas: 1
   maxReplicas: 5
   behavior:
@@ -102,13 +102,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: fiap-x-api-lb-srv
+  name: fiap-x-worker-lb-srv
   annotations:
     service.beta.kubernetes.io/aws-load-balancer-type: nlb
     service.beta.kubernetes.io/aws-load-balancer-internal: "true"
 spec:
   selector:
-    app: fiap-x-api
+    app: fiap-x-worker
   type: LoadBalancer
   ports:
     - name: http
