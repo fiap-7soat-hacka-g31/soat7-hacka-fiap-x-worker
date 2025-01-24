@@ -28,7 +28,7 @@ services:
     command: sh -c "sleep 10 && npm run start:prod"
     ports:
       - 4000:3000
-    depends_on: [mongodb, rabbitmq]
+    depends_on: [aws_s3, rabbitmq]
   aws_s3:
     image: localstack/localstack:s3-latest
     ports:
