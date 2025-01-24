@@ -1,11 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "apps/fiap-x-api/src",
+  "sourceRoot": "apps/fiap-x-worker/src",
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "tsConfigPath": "apps/fiap-x-api/tsconfig.app.json"
+    "tsConfigPath": "apps/fiap-x-worker/tsconfig.app.json"
   },
   "projects": {
     "setup": {
@@ -26,13 +26,13 @@
         "tsConfigPath": "libs/tactical-design/tsconfig.lib.json"
       }
     },
-    "fiap-x-api": {
+    "fiap-x-worker": {
       "type": "application",
-      "root": "apps/fiap-x-api",
+      "root": "apps/fiap-x-worker",
       "entryFile": "main",
-      "sourceRoot": "apps/fiap-x-api/src",
+      "sourceRoot": "apps/fiap-x-worker/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/fiap-x-api/tsconfig.app.json"
+        "tsConfigPath": "apps/fiap-x-worker/tsconfig.app.json"
       }
     },
     "amqp": {
@@ -55,5 +55,5 @@
     }
   },
   "monorepo": true,
-  "root": "apps/fiap-x-api"
+  "root": "apps/fiap-x-worker"
 }

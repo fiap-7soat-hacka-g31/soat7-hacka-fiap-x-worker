@@ -33,6 +33,7 @@ export class AmqpInspectionService {
     const { mode = 'inbound' } = config.trafficInspection ?? {};
     if (!['inbound', 'all'].includes(mode)) {
       this.inspectInbound = () => null;
+      this.inspectInboundPartial = () => null;
     }
     if (!['outbound', 'all'].includes(mode)) {
       this.inspectOutbound = () => null;

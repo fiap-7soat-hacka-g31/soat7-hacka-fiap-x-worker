@@ -1,4 +1,4 @@
-name: FiapXApi - CICD
+name: FiapXWorker - CICD
 
 on:
   push:
@@ -109,10 +109,10 @@ jobs:
         with:
           push: true
           build-args: |
-            target=fiap-x-api
+            target=fiap-x-worker
           tags: |
-            gm50x/fiap-x-api:latest
-            gm50x/fiap-x-api:v${{ github.run_number }}
+            gm50x/fiap-x-worker:latest
+            gm50x/fiap-x-worker:v${{ github.run_number }}
   deploy:
     name: 'Deploy Application'
     runs-on: ubuntu-latest
@@ -136,4 +136,4 @@ jobs:
       - name: Apply K8S
         run: |
           kubectl apply -f k8s/app.deployment.yaml
-          kubectl rollout restart deployment/fiap-x-api
+          kubectl rollout restart deployment/fiap-x-worker
