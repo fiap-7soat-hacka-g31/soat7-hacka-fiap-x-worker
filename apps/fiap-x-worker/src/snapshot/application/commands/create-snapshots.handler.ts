@@ -19,7 +19,15 @@ export class CreateSnapshotsHandler
   ) {}
 
   async execute(command: CreateSnapshotsCommand): Promise<void> {
-    const { event } = command;
+    const { event, currentAttempt } = command;
+    if (currentAttempt >= 5) {
+      return await this.eventPublisher.commit(
+        SnapshotsProcessed.createFailed(
+          event.aggregateId,
+          'Video file could not be processed',
+        ),
+      );
+    }
     const { snapshotIntervalInSeconds, ...cloudFile } = event.data;
     const directoryPathForProcessing = `./processing/${event.aggregateId}`;
     const pathToVideoFile = `${directoryPathForProcessing}/video`;
