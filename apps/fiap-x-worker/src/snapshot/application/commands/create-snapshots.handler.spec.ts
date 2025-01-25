@@ -70,7 +70,7 @@ describe('CreateSnapshotsHandler', () => {
     input.bucket = 'dummy';
     input.path = 'userid/objectid';
     input.snapshotIntervalInSeconds = 2;
-    return new CreateSnapshotsCommand(
+    const command = new CreateSnapshotsCommand(
       new VideoUploaded(
         randomUUID(),
         randomUUID(),
@@ -80,6 +80,8 @@ describe('CreateSnapshotsHandler', () => {
         input,
       ),
     );
+    command.currentAttempt = 1;
+    return command;
   };
 
   it('should throw if download throws', async () => {
@@ -89,6 +91,23 @@ describe('CreateSnapshotsHandler', () => {
       .mockRejectedValue(new Error('too bad'));
     const command = createCommand();
     await expect(async () => await target.execute(command)).rejects.toThrow();
+  });
+
+  it('should reject processing when max attempt is reached', async () => {
+    jest.spyOn(eventPublisher, 'commit').mockResolvedValue();
+    const command = createCommand();
+    command.currentAttempt = 99999;
+    await target.execute(command);
+    expect(eventPublisher.commit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          id: command.event.aggregateId,
+          status: 'FAILED',
+          failReason:
+            'Video file could not be processed before reaching maximum attempts',
+        }),
+      }),
+    );
   });
 
   it('should reject processing if file is not a video file', async () => {

@@ -24,7 +24,7 @@ export class CreateSnapshotsHandler
       return await this.eventPublisher.commit(
         SnapshotsProcessed.createFailed(
           event.aggregateId,
-          'Video file could not be processed',
+          'Video file could not be processed before reaching maximum attempts',
         ),
       );
     }

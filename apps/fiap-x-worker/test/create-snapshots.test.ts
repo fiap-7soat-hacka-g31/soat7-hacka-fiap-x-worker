@@ -1,4 +1,5 @@
 import { AmqpService } from '@fiap-x/amqp';
+import { AmqpParams } from '@fiap-x/amqp/utils/amqp-params.util';
 import { routingKeyOf } from '@fiap-x/tactical-design/amqp';
 import { AggregatePublisherContext } from '@fiap-x/tactical-design/core';
 import { destroyTestApp, environment } from '@fiap-x/test-factory/utils';
@@ -67,7 +68,7 @@ describe('CreateSnapshots', () => {
     );
   });
 
-  it('should reject video and emit failed event', async () => {
+  it('should reject video and emit failed event if file is not a videofile', async () => {
     const amqp = app.get(AmqpService);
     const eventPublisher = app.get(AggregatePublisherContext);
     jest.spyOn(eventPublisher, 'commit');
@@ -85,6 +86,31 @@ describe('CreateSnapshots', () => {
           id: input.aggregateId,
           status: 'FAILED',
           failReason: 'File is not a video file',
+        }),
+      }),
+    );
+  });
+
+  it('should reject processing when maximum attempts reached', async () => {
+    const amqp = app.get(AmqpService);
+    const eventPublisher = app.get(AggregatePublisherContext);
+    jest.spyOn(eventPublisher, 'commit');
+    const input = createInput();
+    await uploadFileWithContentType(app, input, 'application/pdf');
+    await amqp.publish(
+      `fiap.x.api.events`,
+      routingKeyOf(input.eventName),
+      input,
+      { headers: { [AmqpParams.AttemptCountHeader]: 99999 } } as any,
+    );
+    await setTimeout(2500);
+    expect(eventPublisher.commit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          id: input.aggregateId,
+          status: 'FAILED',
+          failReason:
+            'Video file could not be processed before reaching maximum attempts',
         }),
       }),
     );

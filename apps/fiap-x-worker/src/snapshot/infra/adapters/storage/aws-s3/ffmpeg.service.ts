@@ -59,6 +59,7 @@ export class FFMPEGAdapterService implements VideoProcessingService {
         if (!err) {
           return resolve(info);
         }
+        /* istanbul ignore next */
         return reject(err);
       });
     });
