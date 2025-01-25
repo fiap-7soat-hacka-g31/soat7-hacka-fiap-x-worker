@@ -20,8 +20,8 @@ export class CreateSnapshotsController {
     queue: withPrefix(CreateSnapshotsCommand.name),
   })
   @AmqpRetrialPolicy({
-    delay: 25,
-    maxDelay: 25,
+    delay: 60,
+    maxDelay: 60,
     maxAttempts: 5,
   })
   async execute(
