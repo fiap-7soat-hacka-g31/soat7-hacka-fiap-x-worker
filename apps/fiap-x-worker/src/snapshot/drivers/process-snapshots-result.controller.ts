@@ -1,4 +1,8 @@
-import { AmqpRetrialPolicy, AmqpSubscription } from '@fiap-x/amqp';
+import {
+  AmqpCurrentAttempt,
+  AmqpRetrialPolicy,
+  AmqpSubscription,
+} from '@fiap-x/amqp';
 import { routingKeyOfEvent } from '@fiap-x/tactical-design/amqp';
 import { Body, Injectable } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
@@ -16,11 +20,16 @@ export class CreateSnapshotsController {
     queue: withPrefix(CreateSnapshotsCommand.name),
   })
   @AmqpRetrialPolicy({
-    delay: 15,
-    maxDelay: 15,
+    delay: 60,
+    maxDelay: 60,
     maxAttempts: 5,
   })
-  async execute(@Body() event: VideoUploaded) {
-    await this.commandBus.execute(new CreateSnapshotsCommand(event));
+  async execute(
+    @Body() event: VideoUploaded,
+    @AmqpCurrentAttempt() attemptCount: number,
+  ) {
+    const command = new CreateSnapshotsCommand(event);
+    command.currentAttempt = attemptCount;
+    await this.commandBus.execute(command);
   }
 }
