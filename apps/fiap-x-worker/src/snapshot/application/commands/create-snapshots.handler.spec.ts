@@ -4,6 +4,7 @@ import {
 } from '@fiap-x/tactical-design/core';
 import { FakeTransactionManager } from '@fiap-x/test-factory/utils';
 import { INestApplication } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { randomUUID } from 'crypto';
 import { ArchiveAdapterService } from '../../infra/adapters/storage/aws-s3/archiver.service';
@@ -51,6 +52,10 @@ describe('CreateSnapshotsHandler', () => {
         {
           provide: AggregatePublisherContext,
           useValue: Object.create(AggregatePublisherContext.prototype),
+        },
+        {
+          provide: ConfigService,
+          useValue: { get: jest.fn(), getOrThrow: jest.fn() },
         },
       ],
     }).compile();
