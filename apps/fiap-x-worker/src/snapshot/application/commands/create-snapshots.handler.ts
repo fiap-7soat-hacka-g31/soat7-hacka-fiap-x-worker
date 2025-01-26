@@ -20,7 +20,7 @@ export class CreateSnapshotsHandler
 
   async execute(command: CreateSnapshotsCommand): Promise<void> {
     const { event, currentAttempt } = command;
-    if (currentAttempt >= 5) {
+    if (currentAttempt >= 20) {
       return await this.eventPublisher.commit(
         SnapshotsProcessed.createFailed(
           event.aggregateId,
