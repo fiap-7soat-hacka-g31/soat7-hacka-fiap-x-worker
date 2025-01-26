@@ -1,5 +1,6 @@
 import { AggregatePublisherContext } from '@fiap-x/tactical-design/core';
 import { BadRequestException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SnapshotsProcessed } from '../../domain/events/snapshots-processed.event';
 import { ArchiveService } from '../abstractions/archive.service';
@@ -16,9 +17,14 @@ export class CreateSnapshotsHandler
     private readonly videoProcessor: VideoProcessingService,
     private readonly storage: StorageService,
     private readonly eventPublisher: AggregatePublisherContext,
+    private readonly config: ConfigService,
   ) {}
 
   async execute(command: CreateSnapshotsCommand): Promise<void> {
+    const processingPath = this.config.get(
+      'BASE_PATH_FILE_PROCESSING',
+      './processing',
+    );
     const { event, currentAttempt } = command;
     if (currentAttempt >= 5) {
       return await this.eventPublisher.commit(
@@ -29,7 +35,7 @@ export class CreateSnapshotsHandler
       );
     }
     const { snapshotIntervalInSeconds, ...cloudFile } = event.data;
-    const directoryPathForProcessing = `./processing/${event.aggregateId}`;
+    const directoryPathForProcessing = `${processingPath}/${event.aggregateId}`;
     const pathToVideoFile = `${directoryPathForProcessing}/video`;
     const pathToSnapshotsDirectory = `${directoryPathForProcessing}/snapshots`;
     const pathToArchiveFile = `${cloudFile.path}.zip`;
