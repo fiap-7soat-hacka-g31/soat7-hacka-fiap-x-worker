@@ -1,5 +1,5 @@
 import { AggregatePublisherContext } from '@fiap-x/tactical-design/core';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SnapshotsProcessed } from '../../domain/events/snapshots-processed.event';
@@ -12,6 +12,7 @@ import { CreateSnapshotsCommand } from './create-snapshots.command';
 export class CreateSnapshotsHandler
   implements ICommandHandler<CreateSnapshotsCommand, void>
 {
+  private readonly logger = new Logger(this.constructor.name);
   constructor(
     private readonly archiver: ArchiveService,
     private readonly videoProcessor: VideoProcessingService,
@@ -25,8 +26,10 @@ export class CreateSnapshotsHandler
       'BASE_PATH_FILE_PROCESSING',
       './processing',
     );
+    this.logger.warn(`ProcessingPath: ${processingPath}`);
     const { event, currentAttempt } = command;
-    if (currentAttempt >= 5) {
+    this.logger.warn(`CurrentAttempt: ${currentAttempt}`);
+    if (currentAttempt >= 20) {
       return await this.eventPublisher.commit(
         SnapshotsProcessed.createFailed(
           event.aggregateId,
@@ -34,32 +37,43 @@ export class CreateSnapshotsHandler
         ),
       );
     }
+
     const { snapshotIntervalInSeconds, ...cloudFile } = event.data;
     const directoryPathForProcessing = `${processingPath}/${event.aggregateId}`;
     const pathToVideoFile = `${directoryPathForProcessing}/video`;
     const pathToSnapshotsDirectory = `${directoryPathForProcessing}/snapshots`;
     const pathToArchiveFile = `${cloudFile.path}.zip`;
     await this.storage.createDirectory(directoryPathForProcessing);
+    this.logger.warn(
+      `created directory for processing: ${directoryPathForProcessing}`,
+    );
     const contentType = await this.storage.downloadFileToPath(
       cloudFile,
       pathToVideoFile,
     );
+    this.logger.warn(`Downloaded file: ${cloudFile.path} ${contentType}`);
     try {
       if (!contentType.includes('video/')) {
         throw new BadRequestException('File is not a video file');
       }
       await this.storage.createDirectory(pathToSnapshotsDirectory);
+      this.logger.warn(
+        `Created Directory for Snapshots: ${pathToSnapshotsDirectory}`,
+      );
       await this.videoProcessor.takeSnapshots({
         pathToVideo: pathToVideoFile,
         pathToSnapshotsDirectory,
         snapshotIntervalInSeconds,
       });
+      this.logger.warn(`snapshots taken`);
       const archiveFilePath = await this.archiver.createArchive({
         pathToArchive: pathToSnapshotsDirectory,
         outputFileName: 'archive',
       });
+      this.logger.warn(`archive created ${archiveFilePath}`);
 
       await this.storage.uploadFileFromPath(archiveFilePath, pathToArchiveFile);
+      this.logger.warn('`uploaded zip file to cloud');
       await this.eventPublisher.commit(
         SnapshotsProcessed.createSuccess(
           event.aggregateId,
@@ -69,6 +83,7 @@ export class CreateSnapshotsHandler
         ),
       );
     } catch (err) {
+      this.logger.warn(`Failed: ${err.message}`);
       await this.eventPublisher.commit(
         SnapshotsProcessed.createFailed(event.aggregateId, err.message),
       );
