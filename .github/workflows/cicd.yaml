@@ -95,7 +95,7 @@ jobs:
     name: 'Build Application Container'
     runs-on: ubuntu-latest
     needs: [test-acceptance, test-integration]
-    if: github.ref == 'refs/heads/mainx' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     timeout-minutes: 10
     steps:
       - name: Configure Docker Hub
@@ -118,7 +118,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-container]
     environment: 'production'
-    if: github.ref == 'refs/heads/mainx' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     steps:
       - uses: actions/checkout@v4
 
