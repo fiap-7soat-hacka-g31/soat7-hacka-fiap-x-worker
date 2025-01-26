@@ -38,7 +38,7 @@ export class HealthzController {
     const amqp = this.tryGetAMQP();
 
     return this.health.check([
-      () => this.mongodb.pingCheck('Database'),
+      // () => this.mongodb.pingCheck('Database'),
       () => amqp?.isConnected('MessageBroker'),
     ]);
   }
@@ -54,7 +54,7 @@ export class HealthzController {
     const amqp = this.tryGetAMQP();
 
     return this.health.check([
-      () => this.mongodb.pingCheck('Database'),
+      // () => this.mongodb.pingCheck('Database'),
       () => amqp?.isConnected('MessageBroker'),
     ]);
   }
