@@ -13,10 +13,11 @@ export class ArchiveAdapterService implements ArchiveService {
     return new Promise(async (resolve, reject) => {
       const { pathToArchive, outputFileName } = input;
       const filename = outputFileName;
-      const outputPath = join(
+      const prefixPath = pathToArchive.startsWith('/') ? '/' : '';
+      const outputPath = `${prefixPath}${join(
         ...pathToArchive.split('/').slice(0, -1),
         filename,
-      );
+      )}`;
       const output = createWriteStream(outputPath);
       const archive = archiver('zip', { zlib: { level: 9 } });
       archive.on('error', (err) => reject(err));
