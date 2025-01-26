@@ -1,6 +1,6 @@
 import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg';
 import { path as ffprobePath } from '@ffprobe-installer/ffprobe';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as ffmpeg from 'fluent-ffmpeg';
 import { FfprobeData } from 'fluent-ffmpeg';
 import { join } from 'path';
@@ -11,7 +11,10 @@ import {
 
 @Injectable()
 export class FFMPEGAdapterService implements VideoProcessingService {
+  private readonly logger = new Logger(this.constructor.name);
   onModuleInit() {
+    this.logger.log(`FFMPEG: ${ffmpegPath}`);
+    this.logger.log(`FFPROBE: ${ffprobePath}`);
     ffmpeg.setFfmpegPath(ffmpegPath);
     ffmpeg.setFfprobePath(ffprobePath);
   }

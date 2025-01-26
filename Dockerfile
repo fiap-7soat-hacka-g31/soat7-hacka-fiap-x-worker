@@ -13,5 +13,6 @@ WORKDIR /app
 COPY package*.json .
 RUN npm ci --omit=dev
 COPY --from=builder /app/dist/apps/${target} ./dist
+RUN mkdir processing
 EXPOSE ${PORT}
 CMD ["npm", "run", "start:prod"]

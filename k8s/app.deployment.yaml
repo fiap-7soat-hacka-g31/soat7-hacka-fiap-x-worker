@@ -47,6 +47,8 @@ spec:
               value: "fiap7soat-f5-hacka"
             - name: BASE_URL_IDENTITY_SERVICE
               value: "http://fiap-x-identity-lb-srv:3000/dev/identity"
+            - name: BASE_PATH_FILE_PROCESSING
+              value: "/app/processing"
           ports:
             - name: http
               containerPort: 3000
@@ -70,6 +72,15 @@ spec:
             httpGet:
               path: /dev/worker/healthz/self
               port: 3000
+          volumeMounts:
+            - name: "temp-storage"
+              mountPath: "/app/processing"
+      volumes:
+        - name: "temp-storage"
+          emptyDir:
+            medium: ""
+            sizeLimit: "2Gi"
+
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
