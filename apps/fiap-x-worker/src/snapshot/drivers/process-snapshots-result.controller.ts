@@ -20,9 +20,9 @@ export class CreateSnapshotsController {
     queue: withPrefix(CreateSnapshotsCommand.name),
   })
   @AmqpRetrialPolicy({
-    delay: 60,
-    maxDelay: 60,
-    maxAttempts: 5,
+    delay: 15,
+    maxDelay: 15,
+    maxAttempts: 20,
   })
   async execute(
     @Body() event: VideoUploaded,
