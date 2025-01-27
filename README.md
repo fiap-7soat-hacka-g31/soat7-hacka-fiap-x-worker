@@ -1,14 +1,15 @@
-# Hackaton FIAP - Fiap X
+# FIAP X
 
-TODO
+## FIAP - Software Architecture Hackaton - Fase 5
 
-## Interacting with Localstack via Aws Cli:
+Este projeto foi desenvolvido durante a `Fase V` do curso de `Arquitetura de Software` da FIAP como requisito para avaliação.
 
-```bash
-# list objects
-aws --endpoint-url=http://localhost:4566 s3api list-objects --bucket=fiap7soat-f5-hacka
-# get object
-aws --endpoint-url=http://localhost:4566 s3api get-object-attributes --bucket=fiap7soat-f5-hacka --key=6592008029c8c3e4dc76256c/frame_at_140.png
-# delete object
-aws --endpoint-url=http://localhost:4566 s3api delete-object --bucket=fiap7soat-f5-hacka --key=6592008029c8c3e4dc76256c/frame_at_140.png
-```
+Documentação completa do projeto disponível na página da organização no Github: https://github.com/fiap-7soat-hacka-g31
+
+## Integrantes do Grupo
+
+- Julio Augusto Silva (RM355432)
+- Lucas Henrique de Oliveira Silva (RM354904)
+- Getúlio Magela Silva (RM355427)
+- Lucas Rego Lima (RM356101)
+- Lilian Rosario de Jesus (RM355928)
