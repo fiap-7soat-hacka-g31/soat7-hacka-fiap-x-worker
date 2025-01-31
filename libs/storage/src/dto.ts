@@ -10,6 +10,15 @@ export type FileDownloadInput = {
   downloadToPath: string;
 };
 
+export type FileInfoInput = {
+  bucket: string;
+  key: string;
+};
+export type FileInfoOutput = {
+  contentType: string;
+  contentLength: number;
+};
+
 export type SignedUrlOutput = {
   provider: string;
   bucket: string;

@@ -85,7 +85,7 @@ describe('CreateSnapshots', () => {
         data: expect.objectContaining({
           id: input.aggregateId,
           status: 'FAILED',
-          failReason: 'File is not a video file',
+          failReason: 'Invalid file format',
         }),
       }),
     );
@@ -96,7 +96,7 @@ describe('CreateSnapshots', () => {
     const eventPublisher = app.get(AggregatePublisherContext);
     jest.spyOn(eventPublisher, 'commit');
     const input = createInput();
-    await uploadFileWithContentType(app, input, 'application/pdf');
+    await uploadFileWithContentType(app, input, 'video/mp4');
     await amqp.publish(
       `fiap.x.api.events`,
       routingKeyOf(input.eventName),
@@ -109,8 +109,7 @@ describe('CreateSnapshots', () => {
         data: expect.objectContaining({
           id: input.aggregateId,
           status: 'FAILED',
-          failReason:
-            'Video file could not be processed before reaching maximum attempts',
+          failReason: 'Video file could not be processed',
         }),
       }),
     );

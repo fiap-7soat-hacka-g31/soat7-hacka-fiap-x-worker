@@ -25,8 +25,8 @@
     "test:acceptance": "cucumber-js -c ./test/config/cucumber.js"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.731.1",
-    "@aws-sdk/s3-request-presigner": "^3.733.0",
+    "@aws-sdk/client-s3": "^3.738.0",
+    "@aws-sdk/s3-request-presigner": "^3.738.0",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@ffprobe-installer/ffprobe": "^2.1.2",
     "@golevelup/nestjs-rabbitmq": "^5.6.1",

@@ -7,7 +7,7 @@ import { join } from 'path';
 import {
   TakeSnapshotsInput,
   VideoProcessingService,
-} from '../../../../application/abstractions/video-processing.service';
+} from '../../application/abstractions/video-processing.service';
 
 @Injectable()
 export class FFMPEGAdapterService implements VideoProcessingService {

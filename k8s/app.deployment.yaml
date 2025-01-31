@@ -49,6 +49,8 @@ spec:
               value: "http://fiap-x-identity-lb-srv:3000/dev/identity"
             - name: BASE_PATH_FILE_PROCESSING
               value: "/app/processing/fiap-x-worker"
+            - name: MAXIMUM_PROCESSABLE_SIZE_BYTES
+              value: "5242880"
           ports:
             - name: http
               containerPort: 3000
