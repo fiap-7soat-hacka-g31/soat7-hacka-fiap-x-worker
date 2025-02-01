@@ -21,4 +21,5 @@ export const environment = {
   AWS_S3_BUCKET_NAME: 'fiap7soat-f5-hacka-tests',
   AWS_S3_LOCALSTACK_ENDPOINT: 'http://localhost:4566',
   AWS_S3_USE_LOCALSTACK: 'true',
+  MAXIMUM_PROCESSABLE_SIZE_BYTES: '5242880',
 };

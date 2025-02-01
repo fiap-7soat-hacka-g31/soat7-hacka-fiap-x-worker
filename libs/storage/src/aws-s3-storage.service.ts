@@ -1,5 +1,6 @@
 import {
   GetObjectCommand,
+  HeadObjectCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -9,6 +10,8 @@ import { createWriteStream } from 'fs';
 import { Readable } from 'stream';
 import {
   FileDownloadInput,
+  FileInfoInput,
+  FileInfoOutput,
   FileUploadInput,
   FileUploadOutput,
   SignedUrlOutput,
@@ -19,6 +22,20 @@ export class AwsS3StorageService {
   private readonly provider = 'AWS::S3';
 
   constructor(private readonly s3Client: S3Client) {}
+
+  async getInfo({ key, bucket }: FileInfoInput): Promise<FileInfoOutput> {
+    const command = new HeadObjectCommand({
+      Bucket: bucket,
+      Key: key,
+    });
+
+    const result = await this.s3Client.send(command);
+
+    return {
+      contentType: result.ContentType,
+      contentLength: result.ContentLength,
+    };
+  }
 
   async createSignedUrlForDownload(
     bucket: string,
@@ -64,7 +81,11 @@ export class AwsS3StorageService {
     key,
     downloadToPath,
   }: FileDownloadInput): Promise<{ contentType: string }> {
-    const command = new GetObjectCommand({ Bucket: bucket, Key: key });
+    const command = new GetObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      ChecksumMode: false as any,
+    });
     const { ContentType, Body: data } = await this.s3Client.send(command);
 
     const writeStream = createWriteStream(downloadToPath);

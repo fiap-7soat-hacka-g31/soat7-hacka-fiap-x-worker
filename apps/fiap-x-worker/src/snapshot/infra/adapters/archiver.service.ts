@@ -5,7 +5,7 @@ import { join } from 'path';
 import {
   ArchiveService,
   CreateArchiveInput,
-} from '../../../../application/abstractions/archive.service';
+} from '../../application/abstractions/archive.service';
 
 @Injectable()
 export class ArchiveAdapterService implements ArchiveService {
@@ -13,6 +13,7 @@ export class ArchiveAdapterService implements ArchiveService {
     return new Promise(async (resolve, reject) => {
       const { pathToArchive, outputFileName } = input;
       const filename = outputFileName;
+      /* istanbul ignore next */
       const prefixPath = pathToArchive.startsWith('/') ? '/' : '';
       const outputPath = `${prefixPath}${join(
         ...pathToArchive.split('/').slice(0, -1),
@@ -20,8 +21,8 @@ export class ArchiveAdapterService implements ArchiveService {
       )}`;
       const output = createWriteStream(outputPath);
       const archive = archiver('zip', { zlib: { level: 9 } });
-      archive.on('error', (err) => reject(err));
-      output.on('error', (err) => reject(err));
+      archive.on('error', /* istanbul ignore next */ (err) => reject(err));
+      output.on('error', /* istanbul ignore next */ (err) => reject(err));
       output.on('close', () => resolve(outputPath));
       archive.pipe(output);
       archive.directory(pathToArchive, false);

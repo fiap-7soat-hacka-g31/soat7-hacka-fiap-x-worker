@@ -4,8 +4,9 @@ import { ConfigService } from '@nestjs/config';
 import { mkdir, readFile, rm } from 'fs/promises';
 import {
   CloudFile,
+  FileInfo,
   StorageService,
-} from '../../../../application/abstractions/storage.service';
+} from '../../application/abstractions/storage.service';
 
 @Injectable()
 export class AwsS3StorageAdapterService implements StorageService {
@@ -22,6 +23,13 @@ export class AwsS3StorageAdapterService implements StorageService {
     await rm(path, { force: true, recursive: true });
   }
 
+  async getFileInfo(file: CloudFile): Promise<FileInfo> {
+    return await this.client.getInfo({
+      bucket: file.bucket,
+      key: file.path,
+    });
+  }
+
   async uploadFileFromPath(path: string, cloudPath: string): Promise<void> {
     const bucket = this.config.get('AWS_S3_BUCKET_NAME');
     const content = await readFile(path);
@@ -35,13 +43,11 @@ export class AwsS3StorageAdapterService implements StorageService {
   async downloadFileToPath(
     file: CloudFile,
     pathToDownload: string,
-  ): Promise<string> {
-    const result = await this.client.downloadFile({
+  ): Promise<void> {
+    await this.client.downloadFile({
       bucket: file.bucket,
       key: file.path,
       downloadToPath: pathToDownload,
     });
-
-    return result.contentType;
   }
 }
