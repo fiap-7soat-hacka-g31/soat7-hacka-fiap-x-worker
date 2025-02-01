@@ -21,21 +21,17 @@ export class FFMPEGAdapterService implements VideoProcessingService {
       input;
     const info = await this.getVideoInfo(pathToVideo);
     const duration = info.format.duration;
-    const snapshots = [];
     for (
       let currentTime = 0;
       currentTime < duration;
       currentTime += snapshotIntervalInSeconds
     ) {
-      snapshots.push(
-        this.extractSnapshot(
-          pathToVideo,
-          currentTime,
-          pathToSnapshotsDirectory,
-        ),
+      await this.extractSnapshot(
+        pathToVideo,
+        currentTime,
+        pathToSnapshotsDirectory,
       );
     }
-    await Promise.all(snapshots);
   }
 
   private extractSnapshot(
