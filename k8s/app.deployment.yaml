@@ -44,7 +44,7 @@ spec:
             - name: ROUTE_PREFIX
               value: "dev/worker"
             - name: AWS_S3_BUCKET_NAME
-              value: "fiap7soat-f5-hacka"
+              value: "2b4d76f9-fiap-postech-7soat-g31-f5"
             - name: BASE_URL_IDENTITY_SERVICE
               value: "http://fiap-x-identity-lb-srv:3000/dev/identity"
             - name: BASE_PATH_FILE_PROCESSING
