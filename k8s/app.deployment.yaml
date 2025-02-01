@@ -50,7 +50,7 @@ spec:
             - name: BASE_PATH_FILE_PROCESSING
               value: "/app/processing/fiap-x-worker"
             - name: MAXIMUM_PROCESSABLE_SIZE_BYTES
-              value: "52428800"
+              value: "524288000"
           ports:
             - name: http
               containerPort: 3000
